@@ -1,10 +1,12 @@
+// Importa o Mongoose para criar o modelo
 const mongoose = require('mongoose');
 
+// Define o schema (estrutura) do produto no banco de dados
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Nome do produto é obrigatório'],
-    trim: true
+    trim: true // Remove espaços extras
   },
   description: {
     type: String,
@@ -13,21 +15,22 @@ const productSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: [true, 'Preço é obrigatório'],
-    min: [0, 'Preço não pode ser negativo']
+    min: [0, 'Preço não pode ser negativo'] // Validação de valor mínimo
   },
   category: {
     type: String,
     required: [true, 'Categoria é obrigatória']
   },
   attributes: {
-    type: Map,
+    type: Map, // Map permite atributos dinâmicos (flexibilidade do NoSQL)
     of: String
   },
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: mongoose.Schema.Types.ObjectId, // Referência ao ID do usuário
+    ref: 'User', // Relacionamento com o modelo User
     required: true
   }
-}, { timestamps: true });
+}, { timestamps: true }); // Adiciona createdAt e updatedAt automaticamente
 
+// Exporta o modelo para ser usado nos controllers
 module.exports = mongoose.model('Product', productSchema);
