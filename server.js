@@ -1,14 +1,16 @@
 require('dotenv').config();
 const express = require('express');
-const mongoSanitize = require('express-mongo-sanitize');
 const connectDB = require('./src/config/db');
+const sanitize = require('./src/middlewares/sanitize');
 
 const app = express();
 
 connectDB();
 
 app.use(express.json());
-app.use(mongoSanitize());
+app.use(sanitize);
+
+app.use('/api/auth', require('./src/routes/authRoutes'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
