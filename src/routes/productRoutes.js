@@ -9,6 +9,15 @@ const {
   create, getAll, getOne, update, remove
 } = require('../controllers/productController');
 
+/**
+ * Rotas de produtos da API.
+ *
+ * Todas as rotas abaixo são protegidas pelo middleware de autenticação JWT
+ * e permitem criar, listar, buscar, atualizar e remover produtos.
+ *
+ * @type {import('express').Router}
+ */
+
 // Aplica o middleware de autenticação em todas as rotas abaixo
 // Ou seja, todas exigem token JWT válido
 router.use(auth);

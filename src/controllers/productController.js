@@ -1,7 +1,16 @@
 // Importa o model de produto
 const Product = require('../models/Product');
 
-// CREATE — Cria um novo produto
+/**
+ * Cria um novo produto no banco de dados.
+ *
+ * Utiliza os dados enviados no corpo da requisição e associa o produto
+ * ao usuário autenticado por meio do ID disponível em req.userId.
+ *
+ * @param {import('express').Request} req - Objeto da requisição HTTP contendo os dados do produto em req.body e o ID do usuário em req.userId.
+ * @param {import('express').Response} res - Objeto da resposta HTTP usado para retornar o produto criado ou uma mensagem de erro.
+ * @returns {Promise<void>} Retorna uma resposta JSON com o produto criado.
+ */
 exports.create = async (req, res) => {
   try {
     // Cria o produto com os dados do body + ID do usuário logado
@@ -12,7 +21,16 @@ exports.create = async (req, res) => {
   }
 };
 
-// READ ALL — Lista todos os produtos
+/**
+ * Lista todos os produtos cadastrados.
+ *
+ * Busca todos os produtos no banco de dados e popula os dados básicos
+ * do usuário responsável pela criação de cada produto.
+ *
+ * @param {import('express').Request} req - Objeto da requisição HTTP.
+ * @param {import('express').Response} res - Objeto da resposta HTTP usado para retornar a lista de produtos ou uma mensagem de erro.
+ * @returns {Promise<void>} Retorna uma resposta JSON com a lista de produtos.
+ */
 exports.getAll = async (req, res) => {
   try {
     // Busca todos os produtos e popula os dados do usuário que criou
@@ -23,7 +41,16 @@ exports.getAll = async (req, res) => {
   }
 };
 
-// READ ONE — Busca um produto pelo ID
+/**
+ * Busca um produto específico pelo ID informado na URL.
+ *
+ * Consulta o banco de dados utilizando o parâmetro req.params.id.
+ * Caso o produto não exista, retorna status 404.
+ *
+ * @param {import('express').Request} req - Objeto da requisição HTTP contendo o ID do produto em req.params.id.
+ * @param {import('express').Response} res - Objeto da resposta HTTP usado para retornar o produto encontrado ou uma mensagem de erro.
+ * @returns {Promise<void>} Retorna uma resposta JSON com o produto encontrado.
+ */
 exports.getOne = async (req, res) => {
   try {
     // Busca o produto pelo ID passado na URL
@@ -35,7 +62,17 @@ exports.getOne = async (req, res) => {
   }
 };
 
-// UPDATE — Atualiza um produto pelo ID
+/**
+ * Atualiza um produto existente pelo ID informado na URL.
+ *
+ * Utiliza os dados enviados em req.body para atualizar o produto.
+ * A opção new retorna o documento já atualizado, e runValidators garante
+ * que as validações do schema sejam aplicadas durante a atualização.
+ *
+ * @param {import('express').Request} req - Objeto da requisição HTTP contendo o ID do produto em req.params.id e os dados atualizados em req.body.
+ * @param {import('express').Response} res - Objeto da resposta HTTP usado para retornar o produto atualizado ou uma mensagem de erro.
+ * @returns {Promise<void>} Retorna uma resposta JSON com o produto atualizado.
+ */
 exports.update = async (req, res) => {
   try {
     // Busca e atualiza o produto, retornando o documento atualizado
@@ -50,7 +87,16 @@ exports.update = async (req, res) => {
   }
 };
 
-// DELETE — Remove um produto pelo ID
+/**
+ * Remove um produto existente pelo ID informado na URL.
+ *
+ * Busca o produto pelo ID e o remove do banco de dados.
+ * Caso o produto não exista, retorna status 404.
+ *
+ * @param {import('express').Request} req - Objeto da requisição HTTP contendo o ID do produto em req.params.id.
+ * @param {import('express').Response} res - Objeto da resposta HTTP usado para retornar a confirmação da remoção ou uma mensagem de erro.
+ * @returns {Promise<void>} Retorna uma resposta JSON confirmando a remoção do produto.
+ */
 exports.remove = async (req, res) => {
   try {
     // Busca e deleta o produto pelo ID

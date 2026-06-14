@@ -1,7 +1,17 @@
 // Importa o jsonwebtoken para verificar o token JWT
 const jwt = require('jsonwebtoken');
 
-// Middleware que protege as rotas — verifica se o usuário está autenticado
+/**
+ * Middleware de autenticação das rotas protegidas.
+ *
+ * Verifica se a requisição possui um token JWT válido no header Authorization.
+ * Quando o token é válido, adiciona o ID do usuário em req.userId.
+ *
+ * @param {import('express').Request} req - Requisição HTTP contendo o header Authorization.
+ * @param {import('express').Response} res - Resposta HTTP usada para retornar erros de autenticação.
+ * @param {import('express').NextFunction} next - Função chamada para passar ao próximo middleware ou controller.
+ * @returns {void} Continua o fluxo da requisição ou retorna erro 401.
+ */
 module.exports = (req, res, next) => {
   // Pega o header Authorization da requisição
   const authHeader = req.headers.authorization;

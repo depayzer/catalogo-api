@@ -1,7 +1,14 @@
 // Importa o Mongoose para criar o modelo
 const mongoose = require('mongoose');
 
-// Define o schema (estrutura) do produto no banco de dados
+/**
+ * Schema responsável por definir a estrutura dos produtos no banco de dados.
+ *
+ * Contém os campos principais do produto, suas validações, atributos dinâmicos
+ * e a referência ao usuário responsável pela criação do registro.
+ *
+ * @type {import('mongoose').Schema}
+ */
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -32,5 +39,12 @@ const productSchema = new mongoose.Schema({
   }
 }, { timestamps: true }); // Adiciona createdAt e updatedAt automaticamente
 
-// Exporta o modelo para ser usado nos controllers
+/**
+ * Modelo Mongoose de Produto.
+ *
+ * Fornece os recursos necessários para criar, buscar, atualizar e remover
+ * documentos da coleção de produtos no MongoDB.
+ *
+ * @type {import('mongoose').Model}
+ */
 module.exports = mongoose.model('Product', productSchema);

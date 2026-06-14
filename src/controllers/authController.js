@@ -7,7 +7,16 @@ const bcrypt = require('bcryptjs');
 // Importa o jsonwebtoken para gerar tokens de autenticação
 const jwt = require('jsonwebtoken');
 
-// Controller de registro — cria um novo usuário
+/**
+ * Registra um novo usuário no sistema.
+ *
+ * Verifica se o email já está cadastrado, criptografa a senha informada
+ * e cria um novo usuário no banco de dados.
+ *
+ * @param {import('express').Request} req - Requisição contendo name, email e password em req.body.
+ * @param {import('express').Response} res - Resposta usada para retornar o status do cadastro.
+ * @returns {Promise<void>} Retorna uma mensagem de sucesso com o ID do usuário criado.
+ */
 exports.register = async (req, res) => {
   try {
     // Extrai os dados do corpo da requisição
@@ -31,7 +40,16 @@ exports.register = async (req, res) => {
   }
 };
 
-// Controller de login — autentica o usuário e retorna um token JWT
+/**
+ * Autentica um usuário e gera um token JWT.
+ *
+ * Busca o usuário pelo email, compara a senha enviada com a senha criptografada
+ * e, se as credenciais forem válidas, retorna um token de autenticação.
+ *
+ * @param {import('express').Request} req - Requisição contendo email e password em req.body.
+ * @param {import('express').Response} res - Resposta usada para retornar o token JWT ou uma mensagem de erro.
+ * @returns {Promise<void>} Retorna um token JWT em formato JSON.
+ */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;

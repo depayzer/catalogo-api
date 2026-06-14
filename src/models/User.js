@@ -1,7 +1,14 @@
 // Importa o Mongoose para criar o modelo
 const mongoose = require('mongoose');
 
-// Define o schema (estrutura) do usuário no banco de dados
+/**
+ * Schema responsável por definir a estrutura dos usuários no banco de dados.
+ *
+ * Define os campos obrigatórios do usuário, incluindo nome, email único
+ * e senha com tamanho mínimo.
+ *
+ * @type {import('mongoose').Schema}
+ */
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,5 +28,12 @@ const userSchema = new mongoose.Schema({
   }
 }, { timestamps: true }); // Adiciona createdAt e updatedAt automaticamente
 
-// Exporta o modelo para ser usado nos controllers
+/**
+ * Modelo Mongoose de Usuário.
+ *
+ * Fornece os recursos necessários para criar, buscar e validar usuários
+ * na coleção de usuários do MongoDB.
+ *
+ * @type {import('mongoose').Model}
+ */
 module.exports = mongoose.model('User', userSchema);
