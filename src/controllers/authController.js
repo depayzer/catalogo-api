@@ -1,7 +1,7 @@
-// Importa o model de usuário
+// Importa o model de usuário com as queries MySQL
 const User = require('../models/User');
 
-// Importa o bcryptjs para criptografar senhas
+// Importa o bcryptjs para criptografar e comparar senhas
 const bcrypt = require('bcryptjs');
 
 // Importa o jsonwebtoken para gerar tokens de autenticação
@@ -10,31 +10,38 @@ const jwt = require('jsonwebtoken');
 /**
  * Registra um novo usuário no sistema.
  *
- * Verifica se o email já está cadastrado, criptografa a senha informada
- * e cria um novo usuário no banco de dados.
+ * Verifica se o e-mail já está cadastrado na base MySQL, criptografa
+ * a senha informada com bcrypt e insere o novo usuário na tabela `usuarios`.
  *
- * @param {import('express').Request} req - Requisição contendo name, email e password em req.body.
+ * @async
+ * @function register
+ * @param {import('express').Request}  req - Requisição contendo nome, email e password em req.body.
  * @param {import('express').Response} res - Resposta usada para retornar o status do cadastro.
  * @returns {Promise<void>} Retorna uma mensagem de sucesso com o ID do usuário criado.
  */
 exports.register = async (req, res) => {
   try {
     // Extrai os dados do corpo da requisição
-    const { name, email, password } = req.body;
+    const { nome, email, password } = req.body;
 
-    // Verifica se já existe um usuário com esse email
-    const exists = await User.findOne({ email });
+    // Valida se todos os campos obrigatórios foram enviados
+    if (!nome || !email || !password) {
+      return res.status(400).json({ message: 'nome, email e password são obrigatórios' });
+    }
+
+    // Verifica se já existe um usuário com esse e-mail
+    const exists = await User.findByEmail(email);
     if (exists) {
-      return res.status(400).json({ message: 'Email já cadastrado' });
+      return res.status(400).json({ message: 'E-mail já cadastrado' });
     }
 
     // Criptografa a senha antes de salvar (nunca salva senha em texto puro)
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Cria o usuário no banco de dados
-    const user = await User.create({ name, email, password: hashedPassword });
+    // Insere o usuário no banco de dados relacional
+    const insertId = await User.create(nome, email, hashedPassword);
 
-    res.status(201).json({ message: 'Usuário criado com sucesso', id: user._id });
+    res.status(201).json({ message: 'Usuário criado com sucesso', id: insertId });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -43,32 +50,37 @@ exports.register = async (req, res) => {
 /**
  * Autentica um usuário e gera um token JWT.
  *
- * Busca o usuário pelo email, compara a senha enviada com a senha criptografada
- * e, se as credenciais forem válidas, retorna um token de autenticação.
+ * Busca o usuário pelo e-mail na base MySQL, compara a senha enviada com a
+ * senha criptografada armazenada e, se as credenciais forem válidas,
+ * retorna um token JWT contendo o ID do usuário no payload.
  *
- * @param {import('express').Request} req - Requisição contendo email e password em req.body.
- * @param {import('express').Response} res - Resposta usada para retornar o token JWT ou uma mensagem de erro.
+ * O ID do usuário no token é exigido pelas rotas protegidas de categorias.
+ *
+ * @async
+ * @function login
+ * @param {import('express').Request}  req - Requisição contendo email e password em req.body.
+ * @param {import('express').Response} res - Resposta usada para retornar o token JWT ou erro.
  * @returns {Promise<void>} Retorna um token JWT em formato JSON.
  */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Busca o usuário pelo email
-    const user = await User.findOne({ email });
+    // Busca o usuário pelo e-mail no banco relacional
+    const user = await User.findByEmail(email);
     if (!user) {
-      // Mensagem genérica para não revelar se o email existe ou não
+      // Mensagem genérica para não revelar se o e-mail existe ou não
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
     // Compara a senha digitada com a senha criptografada no banco
-    const match = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.senha);
     if (!match) {
       return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
     // Gera o token JWT com o ID do usuário, expira em 1 dia
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       expiresIn: '1d'
     });
 

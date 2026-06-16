@@ -1,39 +1,62 @@
-// Importa o Mongoose para criar o modelo
-const mongoose = require('mongoose');
+// Importa o pool de conexões com o banco MySQL
+const pool = require('../config/db');
 
 /**
- * Schema responsável por definir a estrutura dos usuários no banco de dados.
+ * Busca um usuário pelo endereço de e-mail.
  *
- * Define os campos obrigatórios do usuário, incluindo nome, email único
- * e senha com tamanho mínimo.
+ * Utiliza Prepared Statement (?) para prevenir ataques de SQL Injection.
  *
- * @type {import('mongoose').Schema}
+ * @async
+ * @function findByEmail
+ * @param {string} email - E-mail do usuário a ser buscado.
+ * @returns {Promise<Object|null>} Retorna o objeto do usuário encontrado ou null se não existir.
  */
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Nome é obrigatório'], // Campo obrigatório
-    trim: true // Remove espaços extras
-  },
-  email: {
-    type: String,
-    required: [true, 'Email é obrigatório'],
-    unique: true, // Não permite emails duplicados
-    lowercase: true // Salva sempre em minúsculo
-  },
-  password: {
-    type: String,
-    required: [true, 'Senha é obrigatória'],
-    minlength: 6 // Mínimo de 6 caracteres
-  }
-}, { timestamps: true }); // Adiciona createdAt e updatedAt automaticamente
+async function findByEmail(email) {
+  const [rows] = await pool.execute(
+    'SELECT * FROM usuarios WHERE email = ?',
+    [email]
+  );
+  return rows[0] || null;
+}
 
 /**
- * Modelo Mongoose de Usuário.
+ * Busca um usuário pelo ID, retornando apenas os campos não sensíveis.
  *
- * Fornece os recursos necessários para criar, buscar e validar usuários
- * na coleção de usuários do MongoDB.
+ * Utiliza Prepared Statement (?) para prevenir ataques de SQL Injection.
  *
- * @type {import('mongoose').Model}
+ * @async
+ * @function findById
+ * @param {number} id - ID do usuário a ser buscado.
+ * @returns {Promise<Object|null>} Retorna o objeto do usuário (sem senha) ou null se não existir.
  */
-module.exports = mongoose.model('User', userSchema);
+async function findById(id) {
+  const [rows] = await pool.execute(
+    'SELECT id, nome, email FROM usuarios WHERE id = ?',
+    [id]
+  );
+  return rows[0] || null;
+}
+
+/**
+ * Insere um novo usuário na tabela `usuarios`.
+ *
+ * A senha recebida já deve estar criptografada com bcrypt antes de ser passada.
+ * Utiliza Prepared Statement (?) para prevenir ataques de SQL Injection.
+ *
+ * @async
+ * @function create
+ * @param {string} nome      - Nome completo do usuário.
+ * @param {string} email     - E-mail único do usuário.
+ * @param {string} senhaHash - Senha já criptografada com bcrypt.
+ * @returns {Promise<number>} Retorna o ID do usuário recém-inserido.
+ */
+async function create(nome, email, senhaHash) {
+  const [result] = await pool.execute(
+    'INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)',
+    [nome, email, senhaHash]
+  );
+  return result.insertId;
+}
+
+// Exporta as funções para uso nos controllers
+module.exports = { findByEmail, findById, create };

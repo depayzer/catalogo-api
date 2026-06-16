@@ -1,28 +1,27 @@
-// Importa o Mongoose para conectar ao MongoDB
-const mongoose = require('mongoose');
+// Importa o mysql2 com suporte a Promises/async-await
+const mysql = require('mysql2/promise');
 
 /**
- * Realiza a conexão da aplicação com o banco de dados MongoDB.
+ * Pool de conexões com o banco de dados MySQL.
  *
- * Utiliza a variável de ambiente MONGO_URI para estabelecer a conexão.
- * Caso a conexão falhe, exibe o erro no terminal e encerra o processo.
+ * Utiliza variáveis de ambiente para isolar as credenciais,
+ * evitando que informações sensíveis fiquem expostas no código-fonte.
  *
- * @async
- * @function connectDB
- * @returns {Promise<void>} Retorna uma Promise resolvida quando a conexão é estabelecida.
- * @throws {Error} Pode lançar erro caso a conexão com o MongoDB falhe.
+ * O pool reutiliza conexões abertas em vez de criar uma nova a cada requisição,
+ * melhorando a performance da aplicação.
+ *
+ * @type {import('mysql2/promise').Pool}
  */
-const connectDB = async () => {
-  try {
-    // Tenta conectar usando a URI definida nas variáveis de ambiente
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('MongoDB conectado!');
-  } catch (error) {
-    // Se falhar, exibe o erro e encerra o processo
-    console.error('Erro ao conectar:', error.message);
-    process.exit(1);
-  }
-};
+const pool = mysql.createPool({
+  host:     process.env.DB_HOST,
+  port:     process.env.DB_PORT || 3306,
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true, // Aguarda conexão disponível se o limite for atingido
+  connectionLimit: 10,      // Máximo de conexões simultâneas no pool
+  queueLimit: 0             // 0 = fila ilimitada de requisições aguardando conexão
+});
 
-// Exporta a função para ser usada no server.js
-module.exports = connectDB;
+// Exporta o pool para ser utilizado nos models
+module.exports = pool;
